@@ -1,7 +1,7 @@
 let depositShares = {};
 let multiplierPerDS = 1;
 let totalUSDC = 0; //USDC.getBalance(this)
-let totalDeployedUSDC = 0; // ??
+let totalDeployedUSDC = [0]; // ??
 let totalDepositShares = 0; //DepositSharestoken.totalSupply()
 
 let totalCrab = 0; //crabShares
@@ -14,6 +14,7 @@ const perCrabValue = ()=> ETHUSD; // Abstract out, *** Need reality
 let round = 0
 
 const deposit = (user_id, amount) => {
+  console.log("user " , user_id, "is adding ", amount);
   if(!depositShares[user_id]) {
     depositShares[user_id] = 0;
   }
@@ -23,26 +24,31 @@ const deposit = (user_id, amount) => {
 }
 
 const hedge = (percent) => {
+  
+  let thisRoundCrab = 0;
   round += 1;
   const amount = totalUSDC * percent;
   totalUSDC -= amount;
-  totalDeployedUSDC += amount;
+  totalDeployedUSDC[round] =totalDeployedUSDC[round-1]+ amount;
   
   multiplierPerDS = multiplierPerDS * (1-percent);
+  thisRoundCrab = (amount/(amount+totalDeployedUSDC[round-1]))
 
   if(totalCrab === 0) {
     totalCrab = amount;
   } else {
-    totalCrab += amount / perCrabValue();
+    //totalCrab += amount / perCrabValue();
+    console.log("thisroundCrab ",thisRoundCrab)
+    totalCrab = totalCrab / (1-thisRoundCrab);
   }
-  let CrabIncrease = amount / perCrabValue();
+  console.log(" round ",round,"hedge percent", percent ," crab", thisRoundCrab);
+  let CrabIncrease = totalCrab * thisRoundCrab;
   crabPerDS[round] = crabPerDS[round-1] + (CrabIncrease / totalDepositShares);
 
   
 }
 
 let main = () => {
-  console.log('starting crab accounting');
   deposit(1, 100);
   printVars();
   
@@ -51,10 +57,11 @@ let main = () => {
 
   hedge(0.3333333);
   printVars();
+  
 }
 
 const printVars = ()=> {
-  console.log(depositShares, Math.round(totalUSDC), totalDepositShares, Math.round(totalUSDC/totalDepositShares), crabPerDS);
+  console.log(depositShares, Math.round(totalUSDC), totalDepositShares, totalUSDC/totalDepositShares, crabPerDS);
 }
 
 let getUserBalance = (user_id) => {
