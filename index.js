@@ -18,6 +18,14 @@ let accrued_crab = {}; //per user, when he withdraws
 let full_hedge = [];
 
 const deposit = (user_id, amount) => {
+  //full hedge between last user deposit round, and current round){
+  let lastFullHedge = full_hedge[full_hedge.length - 1];
+  if (lastFullHedge >= lastDepositedRound[user_id]) {
+    accrued_crab[user_id] = depositShares[user_id] * crabPerDS[round];
+    totalDepositShares -= depositShares[user_id];
+    depositShares[user_id] = 0;
+  }
+
   lastDepositedRound[user_id] = round + 1;
   console.log("user ", user_id, "is adding ", amount);
   if (!depositShares[user_id]) {
@@ -78,7 +86,7 @@ const hedge = (percent) => {
 };
 
 let main = () => {
-  deposit(1, 100);
+  /**  deposit(1, 100);
   printVars();
 
   hedge(0.25);
@@ -107,6 +115,23 @@ let main = () => {
 
   hedge(0.5);
   printVars();
+  */
+
+  deposit(1, 100);
+  printVars();
+
+  deposit(1, 100);
+  printVars();
+
+  hedge(1);
+  printVars();
+
+  getUserBalance(1);
+
+  deposit(1, 100);
+  printVars();
+
+  getUserBalance(1);
 };
 
 const printVars = () => {
@@ -128,7 +153,12 @@ const printVars = () => {
 
 let getUserBalance = (user_id) => {
   let result = {};
-  let sharesAtLastFullHedge = full_hedge; // I am guessing we will need to
+  let sharesAtLastFullHedge = 0; // I am guessing we will need to
+  if (full_hedge.length > 0) {
+    let last_full_hedge = full_hedge[full_hedge.length - 1];
+    let crabPerDSAtLastFullHedge = crabPerDS[last_full_hedge];
+    sharesAtLastFullHedge = depositShares[user_id] / crabPerDSAtLastFullHedge;
+  }
   result.USDC =
     (depositShares[user_id] - sharesAtLastFullHedge) * multiplierPerDS;
   result.crab =
@@ -141,6 +171,8 @@ let getUserBalance = (user_id) => {
 };
 
 main();
+
+// should be User Balance of  1  is  { USDC: 100, crab: 200 }
 //  Bug: User 1 should not be able to remove post hedge 1, after user 2 adds 200, before round 4
 // his balance should be zero.
 // Bug: getBalance(2) is not right as price/DS is incorrect after User deposits 200
