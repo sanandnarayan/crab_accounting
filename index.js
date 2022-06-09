@@ -154,8 +154,9 @@ const printVars = () => {
 let getUserBalance = (user_id) => {
   let result = {};
   let sharesAtLastFullHedge = 0; // I am guessing we will need to
-  if (full_hedge.length > 0) {
-    let last_full_hedge = full_hedge[full_hedge.length - 1];
+  let last_full_hedge = full_hedge[full_hedge.length - 1] ?? -1;
+  // TODO look at this buggy logic
+  if (full_hedge.length > 0 && lastDepositedRound[user_id] < last_full_hedge) {
     let crabPerDSAtLastFullHedge = crabPerDS[last_full_hedge];
     sharesAtLastFullHedge = depositShares[user_id] / crabPerDSAtLastFullHedge;
   }

@@ -1,0 +1,14 @@
+{
+  "name": "crab_accounting",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/sanandnarayan/crab_accounting",
+  "author": "Anand Narayan <i@codeanand.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mocha": "^10.0.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  }
+}
