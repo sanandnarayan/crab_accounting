@@ -80,7 +80,7 @@ let main = () => {
   withdraw(1, 25);
   printVars();
   
-  hedge(0.5);
+  hedge(1);
   printVars();
 
   deposit(2, 200);
@@ -113,7 +113,7 @@ let getUserBalance = (user_id) => {
 
 main();
 
-// TODO create the hedge = 1 case, and then solve it using an array
+// TODO Fix the infinity; using an array
 // where you record the zeroing out. 
 
 // Think about the case where there are no deposits and hedges for sometime.
