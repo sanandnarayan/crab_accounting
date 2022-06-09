@@ -128,7 +128,9 @@ const printVars = () => {
 
 let getUserBalance = (user_id) => {
   let result = {};
-  result.USDC = depositShares[user_id] * multiplierPerDS;
+  let sharesAtLastFullHedge = full_hedge; // I am guessing we will need to
+  result.USDC =
+    (depositShares[user_id] - sharesAtLastFullHedge) * multiplierPerDS;
   result.crab =
     depositShares[user_id] *
       (crabPerDS[crabPerDS.length - 1] -
@@ -140,6 +142,7 @@ let getUserBalance = (user_id) => {
 
 main();
 //  Bug: User 1 should not be able to remove post hedge 1, after user 2 adds 200, before round 4
+// his balance should be zero.
 // Bug: getBalance(2) is not right as price/DS is incorrect after User deposits 200
 
 // TODO Fix the infinity; using an array
