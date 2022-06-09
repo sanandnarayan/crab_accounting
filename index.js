@@ -14,25 +14,34 @@ let ETHUSD = 1;
 const perCrabValue = ()=> ETHUSD; // Abstract out, *** Need reality
 let round = 0
 
+
+let accrued_crab = {};
+
 const deposit = (user_id, amount) => {
   lastDepositedRound[user_id] = round+1;
   console.log("user " , user_id, "is adding ", amount);
   if(!depositShares[user_id]) {
     depositShares[user_id] = 0;
   }
-  depositShares[user_id] = depositShares[user_id]  + amount/multiplierPerDS;
+
+  let added_shares = amount/multiplierPerDS
+  depositShares[user_id] = depositShares[user_id]  + added_shares;
   totalUSDC += amount;
-  totalDepositShares += amount/multiplierPerDS;
+  totalDepositShares += added_shares;
 }
 
 const withdraw = (user_id, amount) => {
   if(amount > getUserBalance(user_id)['USDC']) return;
   lastDepositedRound[user_id] = round+1;
   console.log("user " , user_id, "is removing ", amount);
- 
+
+  let withdrawn_shares = amount/multiplierPerDS
   depositShares[user_id] = depositShares[user_id]  - amount/multiplierPerDS;
   totalUSDC -= amount;
-  totalDepositShares -= amount/multiplierPerDS;
+  totalDepositShares -= withdrawn_shares;
+
+  accrued_crab[user_id] = withdrawn_shares * crabPerDS[round];
+  console.log("added to accrued_crab" , accrued_crab[user_id]);
 }
 
 const hedge = (percent) => {
@@ -98,17 +107,13 @@ const printVars = ()=> {
 let getUserBalance = (user_id) => {
   let result = {};
   result.USDC = depositShares[user_id]*multiplierPerDS;
-  result.crab = depositShares[user_id] * (crabPerDS[crabPerDS.length-1] - crabPerDS[lastDepositedRound[user_id]-1])
+  result.crab = (depositShares[user_id] * (crabPerDS[crabPerDS.length-1] - crabPerDS[lastDepositedRound[user_id]-1])) + (accrued_crab[user_id]??0) ;
   
   return result;
 }
 
 
 main();
-
-
-// TODO create the case where we need the unclaimed array
-// create the unclaimed array, and new balance implementation
 
 // TODO create the hedge = 1 case, and then solve it using an array
 // where you record the zeroing out. 
