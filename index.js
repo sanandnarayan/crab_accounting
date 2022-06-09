@@ -1,21 +1,22 @@
 let depositShares = {};
 let multiplierPerDS = 1;
 let totalUSDC = 0; //USDC.getBalance(this)
-let totalDeployedUSDC = [0]; // ??
+let totalDeployedUSDC = [0]; // totalDeployedUSD cummulative roundwise to calculate crab per round
 let totalDepositShares = 0; //DepositSharestoken.totalSupply()
-let lastDepositedRound = {};
+let lastDepositedRound = {}; // lastDepositedRound of each user
 
 let totalCrab = 0; //crabShares
-let crabPerDS = [0]
+let crabPerDS = [0] //crabShaeresPerDepositedShare cumulative per round array
 
 let vault = {debt: 25, collateral: 50}; // in eth
 let ETHUSD = 1;
 //const crabValue = ()=> (vault.collateral - vault.debt)*ETHUSD;
 const perCrabValue = ()=> ETHUSD; // Abstract out, *** Need reality
-let round = 0
+let round = 0 // current round
 
 
-let accrued_crab = {};
+let accrued_crab = {}; //per user, when he withdraws
+let full_hedge = []
 
 const deposit = (user_id, amount) => {
   lastDepositedRound[user_id] = round+1;
@@ -51,8 +52,14 @@ const hedge = (percent) => {
   const amount = totalUSDC * percent;
   totalUSDC -= amount;
   totalDeployedUSDC[round] =totalDeployedUSDC[round-1]+ amount;
-  
-  multiplierPerDS = multiplierPerDS * (1-percent);
+
+
+  if(percent === 1){
+    multiplierPerDS = 1;
+    full_hedge.push(round);
+  } else {
+    multiplierPerDS = multiplierPerDS * (1-percent);
+  }
   thisRoundCrab = (amount/(amount+totalDeployedUSDC[round-1]))
 
   if(totalCrab === 0) {
@@ -99,7 +106,7 @@ let main = () => {
 }
 
 const printVars = ()=> {
-  console.log(depositShares, Math.round(totalUSDC), totalDepositShares, totalUSDC/totalDepositShares, crabPerDS, lastDepositedRound);
+  console.log(depositShares, "totalUSDC",Math.round(totalUSDC), "totalShares",totalDepositShares, "USDCperShare",totalUSDC/totalDepositShares, "crabPerDS",crabPerDS, "lastUserDepositRound",lastDepositedRound);
 }
 
 let getUserBalance = (user_id) => {
@@ -112,6 +119,8 @@ let getUserBalance = (user_id) => {
 
 
 main();
+
+//
 
 // TODO Fix the infinity; using an array
 // where you record the zeroing out. 
