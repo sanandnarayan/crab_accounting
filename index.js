@@ -93,6 +93,7 @@ let main = () => {
   deposit(2, 200);
   printVars();
 
+  
   hedge(0.2);
   printVars();
 
@@ -106,7 +107,7 @@ let main = () => {
 }
 
 const printVars = ()=> {
-  console.log(depositShares, "totalUSDC",Math.round(totalUSDC), "totalShares",totalDepositShares, "USDCperShare",totalUSDC/totalDepositShares, "crabPerDS",crabPerDS, "lastUserDepositRound",lastDepositedRound);
+  console.log(depositShares, "totalUSDC",Math.round(totalUSDC), "totalShares",totalDepositShares, "USDCperShare",totalUSDC/totalDepositShares, "crabPerDS",crabPerDS, "lastUserDepositRound",lastDepositedRound, "\n----------\n");
 }
 
 let getUserBalance = (user_id) => {
@@ -119,8 +120,10 @@ let getUserBalance = (user_id) => {
 
 
 main();
+// Bug: getBalance(2) is not right as price/DS is incorrect after User deposits 200
 
-//
+//    Bug: User 1 should not be able to remove post hedge 1, after user 2 adds 200, before round 4
+
 
 // TODO Fix the infinity; using an array
 // where you record the zeroing out. 
