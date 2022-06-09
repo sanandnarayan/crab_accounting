@@ -91,3 +91,10 @@ let getUserBalance = (user_id) => {
 
 
 main();
+
+
+// TODO create the case where we need the unclaimed array
+// create the unclaimed array, and new balance implementation
+
+// TODO create the hedge = 1 case, and then solve it using an array
+// where you record the zeroing out. 
