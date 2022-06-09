@@ -25,6 +25,16 @@ const deposit = (user_id, amount) => {
   totalDepositShares += amount/multiplierPerDS;
 }
 
+const withdraw = (user_id, amount) => {
+  if(amount > getUserBalance(user_id)['USDC']) return;
+  lastDepositedRound[user_id] = round+1;
+  console.log("user " , user_id, "is removing ", amount);
+ 
+  depositShares[user_id] = depositShares[user_id]  - amount/multiplierPerDS;
+  totalUSDC -= amount;
+  totalDepositShares -= amount/multiplierPerDS;
+}
+
 const hedge = (percent) => {
   
   let thisRoundCrab = 0;
@@ -56,9 +66,13 @@ let main = () => {
   hedge(0.25);
   printVars();
 
+
   hedge(0.3333333);
   printVars();
 
+  withdraw(1, 25);
+  printVars();
+  
   hedge(0.5);
   printVars();
 
