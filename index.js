@@ -64,8 +64,6 @@ const hedge = (percent) => {
   console.log(" round ",round,"hedge percent", percent ," ThisRoundCrab", thisRoundCrab);
   let CrabIncrease = totalCrab * thisRoundCrab;
   crabPerDS[round] = crabPerDS[round-1] + (CrabIncrease / totalDepositShares);
-
-  
 }
 
 let main = () => {
@@ -117,3 +115,7 @@ main();
 
 // TODO create the hedge = 1 case, and then solve it using an array
 // where you record the zeroing out. 
+
+// Think about the case where there are no deposits and hedges for sometime.
+// In that the strategy accrues large profits, and the crabShareValue increases.
+// Does this affect our code? we currently use USDValueContributed in that round / total USDvalue contributed in line 56
