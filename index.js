@@ -73,7 +73,8 @@ let main = () => {
 
   hedge(0.5);
   printVars();
-  
+
+  console.log(getUserBalance(2));
 }
 
 const printVars = ()=> {
@@ -81,7 +82,11 @@ const printVars = ()=> {
 }
 
 let getUserBalance = (user_id) => {
-  return depositShares[user_id]*multiplierPerDS;
+  let result = {};
+  result.USDC = depositShares[user_id]*multiplierPerDS;
+  result.crab = depositShares[user_id] * (crabPerDS[crabPerDS.length-1] - crabPerDS[lastDepositedRound[user_id]-1])
+  
+  return result;
 }
 
 
