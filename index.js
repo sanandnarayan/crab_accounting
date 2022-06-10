@@ -198,7 +198,9 @@ let getUserBalance = (user_id) => {
   // If there was a full hedge after the user deposited
   // then set the sharesAtFullHedge to fullShares
   if (anyFullHedge && last_full_hedge >= lastDepositedRound[user_id]) {
+    // get the first full hedge after users last deposit
     let top = greaterOrEquals(lastDepositedRound[user_id], full_hedge);
+    // TODO convert this to a view function!
     claimCrabs(user_id, top, 1);
   }
   result.USDC = depositShares[user_id] * multiplierPerDS;
@@ -216,14 +218,6 @@ let getUserBalance = (user_id) => {
 };
 
 export { withdraw, deposit, getUserBalance, hedge, reset, printVars };
-
-// should be User Balance of  1  is  { USDC: 100, crab: 200 }
-//  Bug: User 1 should not be able to remove post hedge 1, after user 2 adds 200, before round 4
-// his balance should be zero.
-// Bug: getBalance(2) is not right as price/DS is incorrect after User deposits 200
-
-// TODO Fix the infinity; using an array
-// where you record the zeroing out.
 
 // Think about the case where there are no deposits and hedges for sometime.
 // In that the strategy accrues large profits, and the crabShareValue increases.
