@@ -32,7 +32,11 @@ const greaterOrEquals = (x, array) => {
   // TODO change this to binary implementation
   let i = 0;
   while (i < array.length) {
-    if (array[i] >= x) break;
+    if (array[i] >= x) {
+      break;
+    } else {
+      i++;
+    }
   }
   return array[i];
 };
