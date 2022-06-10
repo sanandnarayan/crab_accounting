@@ -1,27 +1,48 @@
 let depositShares = {};
+let lastDepositedRound = {}; // lastDepositedRound of each user
 let multiplierPerDS = 1;
+let totalDepositShares = 0; //DepositSharestoken.totalSupply()
+
 let totalUSDC = 0; //USDC.getBalance(this)
 let totalDeployedUSDC = [0]; // totalDeployedUSD cummulative roundwise to calculate crab per round
-let totalDepositShares = 0; //DepositSharestoken.totalSupply()
-let lastDepositedRound = {}; // lastDepositedRound of each user
 
 let totalCrab = 0; //crabShares
 let crabPerDS = [0]; //crabShaeresPerDepositedShare cumulative per round array
-
-let vault = { debt: 25, collateral: 50 }; // in eth
-let ETHUSD = 1;
-//const crabValue = ()=> (vault.collateral - vault.debt)*ETHUSD;
-const perCrabValue = () => ETHUSD; // Abstract out, *** Need reality
-let round = 0; // current round
-
 let accrued_crab = {}; //per user, when he withdraws
+
+let round = 0; // current round
 let full_hedge = [];
+
+const reset = () => {
+  depositShares = {};
+  multiplierPerDS = 1;
+  totalUSDC = 0; //USDC.getBalance(this)
+  totalDeployedUSDC = [0]; // totalDeployedUSD cummulative roundwise to calculate crab per round
+  totalDepositShares = 0; //DepositSharestoken.totalSupply()
+  lastDepositedRound = {}; // lastDepositedRound of each user
+
+  totalCrab = 0; //crabShares
+  crabPerDS = [0]; //crabShaeresPerDepositedShare cumulative per round array
+
+  //const crabValue = ()=> (vault.collateral - vault.debt)*ETHUSD;
+  round = 0; // current round
+
+  accrued_crab = {}; //per user, when he withdraws
+  full_hedge = [];
+};
 
 const deposit = (user_id, amount) => {
   //full hedge between last user deposit round, and current round){
   let lastFullHedge = full_hedge[full_hedge.length - 1];
   if (lastFullHedge >= lastDepositedRound[user_id]) {
-    accrued_crab[user_id] = depositShares[user_id] * crabPerDS[round];
+    let base =
+      lastFullHedge === lastDepositedRound[user_id]
+        ? lastFullHedge - 1
+        : lastDepositedRound[user_id];
+    accrued_crab[user_id] =
+      depositShares[user_id] * (crabPerDS[lastFullHedge] - crabPerDS[base]);
+    // TODO algo for nearest full hedge
+    // accrued_crab[user_id] = depositShares[user_id] * (crabPerDS[nearEstFullHedge]-crabPerDS[lastDepositedRound[user_id]]);
     totalDepositShares -= depositShares[user_id];
     depositShares[user_id] = 0;
   }
@@ -58,13 +79,6 @@ const hedge = (percent) => {
   const amount = totalUSDC * percent;
   totalUSDC -= amount;
   totalDeployedUSDC[round] = totalDeployedUSDC[round - 1] + amount;
-
-  if (percent === 1) {
-    multiplierPerDS = 1;
-    full_hedge.push(round);
-  } else {
-    multiplierPerDS = multiplierPerDS * (1 - percent);
-  }
   thisRoundCrab = amount / (amount + totalDeployedUSDC[round - 1]);
 
   if (totalCrab === 0) {
@@ -73,6 +87,17 @@ const hedge = (percent) => {
     //totalCrab += amount / perCrabValue();
     totalCrab = totalCrab / (1 - thisRoundCrab);
   }
+  let CrabIncrease = totalCrab * thisRoundCrab;
+  crabPerDS[round] = crabPerDS[round - 1] + CrabIncrease / totalDepositShares;
+
+  if (percent === 1) {
+    multiplierPerDS = 1;
+    full_hedge.push(round);
+    totalDepositShares = 0;
+  } else {
+    multiplierPerDS = multiplierPerDS * (1 - percent);
+  }
+
   console.log(
     " round ",
     round,
@@ -81,8 +106,6 @@ const hedge = (percent) => {
     " ThisRoundCrab",
     thisRoundCrab
   );
-  let CrabIncrease = totalCrab * thisRoundCrab;
-  crabPerDS[round] = crabPerDS[round - 1] + CrabIncrease / totalDepositShares;
 };
 
 let main = () => {
@@ -134,34 +157,59 @@ let main = () => {
   getUserBalance(1);
 };
 
+const USDCperShare = () =>
+  totalDepositShares != 0 ? totalUSDC / totalDepositShares : 0;
+
 const printVars = () => {
   console.log(
     depositShares,
-    "totalUSDC",
+    "\ntotalUSDC",
     Math.round(totalUSDC),
-    "totalShares",
+    "\ntotalShares",
     totalDepositShares,
-    "USDCperShare",
-    totalUSDC / totalDepositShares,
-    "crabPerDS",
+    "\nUSDCperShare",
+    USDCperShare(),
+    "\ncrabPerDS",
     crabPerDS,
-    "lastUserDepositRound",
+    "\nlastUserDepositRound",
     lastDepositedRound,
+    "\nfullHedgeRounds",
+    full_hedge,
     "\n----------\n"
   );
 };
 
+let reduceShares = (user_id, shares) => {
+  depositShares[user_id] -= shares;
+  if (totalDepositShares > 0) {
+    totalDepositShares -= shares;
+  }
+};
+
+let claimCrabs = (user_id, till_round, percent) => {
+  let previousShares = depositShares[user_id];
+  reduceShares(user_id, previousShares * percent);
+  let last_deposit_from_user = lastDepositedRound[user_id];
+
+  if (till_round === last_deposit_from_user) {
+    // set last_deposit_user_round to the previous to the previous round
+    last_deposit_from_user -= 1;
+  }
+  accrued_crab[user_id] =
+    previousShares *
+    (crabPerDS[till_round] - crabPerDS[last_deposit_from_user]);
+};
+
 let getUserBalance = (user_id) => {
   let result = {};
-  let sharesAtLastFullHedge = 0; // I am guessing we will need to
   let last_full_hedge = full_hedge[full_hedge.length - 1] ?? -1;
-  // TODO look at this buggy logic
-  if (full_hedge.length > 0 && lastDepositedRound[user_id] < last_full_hedge) {
-    let crabPerDSAtLastFullHedge = crabPerDS[last_full_hedge];
-    sharesAtLastFullHedge = depositShares[user_id] / crabPerDSAtLastFullHedge;
+  let anyFullHedge = full_hedge.length > 0;
+  // If there was a full hedge after the user deposited
+  // then set the sharesAtFullHedge to fullShares
+  if (anyFullHedge && lastDepositedRound[user_id] <= last_full_hedge) {
+    claimCrabs(user_id, last_full_hedge, 1);
   }
-  result.USDC =
-    (depositShares[user_id] - sharesAtLastFullHedge) * multiplierPerDS;
+  result.USDC = depositShares[user_id] * multiplierPerDS;
   result.crab =
     depositShares[user_id] *
       (crabPerDS[crabPerDS.length - 1] -
@@ -171,7 +219,7 @@ let getUserBalance = (user_id) => {
   return result;
 };
 
-main();
+export { withdraw, deposit, getUserBalance, hedge, reset, printVars };
 
 // should be User Balance of  1  is  { USDC: 100, crab: 200 }
 //  Bug: User 1 should not be able to remove post hedge 1, after user 2 adds 200, before round 4
