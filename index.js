@@ -29,8 +29,8 @@ const reset = () => {
 };
 
 const deposit = (user_id, amount) => {
-  //full hedge between last user deposit round, and current round){
   let lastFullHedge = full_hedge[full_hedge.length - 1];
+  //has a full hedge happened after user deposited
   if (lastFullHedge >= lastDepositedRound[user_id]) {
     let base =
       lastFullHedge === lastDepositedRound[user_id]
@@ -50,10 +50,10 @@ const deposit = (user_id, amount) => {
     depositShares[user_id] = 0;
   }
 
-  let added_shares = amount / multiplierPerDS;
-  depositShares[user_id] = depositShares[user_id] + added_shares;
   totalUSDC += amount;
+  let added_shares = amount / multiplierPerDS;
   totalDepositShares += added_shares;
+  depositShares[user_id] = depositShares[user_id] + added_shares;
 };
 
 const withdraw = (user_id, amount) => {
@@ -172,6 +172,8 @@ const printVars = () => {
     lastDepositedRound,
     "\nfullHedgeRounds",
     full_hedge,
+    "\naccrued crabs",
+    accrued_crab,
     "\n----------\n"
   );
 };
@@ -207,11 +209,15 @@ let getUserBalance = (user_id) => {
     claimCrabs(user_id, last_full_hedge, 1);
   }
   result.USDC = depositShares[user_id] * multiplierPerDS;
+
+  // lastest compounded Crab price - the crab price the user paid?
+  // crabPerDS is cumulative, so you have to take one round prior
+  // for ex: crabPerDS [ 0, 0.5 ] , so user got 100* (0.5-0)
+  let userUnClaimedCrab =
+    crabPerDS[crabPerDS.length - 1] -
+    crabPerDS[lastDepositedRound[user_id] - 1];
   result.crab =
-    depositShares[user_id] *
-      (crabPerDS[crabPerDS.length - 1] -
-        crabPerDS[lastDepositedRound[user_id] - 1]) +
-    (accrued_crab[user_id] ?? 0);
+    depositShares[user_id] * userUnClaimedCrab + (accrued_crab[user_id] ?? 0);
   console.log("User Balance of ", user_id, " is ", result, "\n");
   return result;
 };

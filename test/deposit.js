@@ -39,6 +39,26 @@ describe("Algo", function () {
       assert.equal(balance.USDC, 100);
       assert.equal(balance.crab, 100);
     });
+    it("allows a user to deposit, and know his balance after a partial hedge", function () {
+      deposit(1, 100);
+      printVars();
+      hedge(0.5);
+      printVars();
+      let balance = getUserBalance(1);
+      assert.equal(balance.USDC, 50);
+      assert.equal(balance.crab, 50);
+    });
+    it("allows a user to deposit again after a hedge, and know his balance", function () {
+      deposit(1, 100);
+      printVars();
+      hedge(0.5);
+      printVars();
+      deposit(1, 100);
+      printVars();
+      let balance = getUserBalance(1);
+      assert.equal(balance.USDC, 150);
+      assert.equal(balance.crab, 50);
+    });
     xit("deposit, and balance long after hedge", function () {
       deposit(1, 100);
       printVars();
@@ -67,3 +87,7 @@ describe("Algo", function () {
     });
   });
 });
+
+// so I need to claim the crabs, when a user deposits after a hedge (partial of ful) has happend.
+// why because at that stage , the deposited shares then represent the crabs also which is not true as the hedge has not happened.
+// but that is why we have the round numbers right? But as we dont know what was the deposit shares before the deposit we need to do the claim
