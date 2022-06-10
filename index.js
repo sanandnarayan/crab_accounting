@@ -113,55 +113,6 @@ const hedge = (percent) => {
   );
 };
 
-let main = () => {
-  /**  deposit(1, 100);
-  printVars();
-
-  hedge(0.25);
-  printVars();
-
-  hedge(0.3333333);
-  printVars();
-
-  withdraw(1, 25);
-  printVars();
-
-  hedge(1);
-  printVars();
-
-  deposit(2, 200);
-  printVars();
-
-  getUserBalance(2);
-  getUserBalance(1);
-
-  hedge(0.2);
-  printVars();
-
-  hedge(0.2);
-  printVars();
-
-  hedge(0.5);
-  printVars();
-  */
-
-  deposit(1, 100);
-  printVars();
-
-  deposit(1, 100);
-  printVars();
-
-  hedge(1);
-  printVars();
-
-  getUserBalance(1);
-
-  deposit(1, 100);
-  printVars();
-
-  getUserBalance(1);
-};
-
 const USDCperShare = () =>
   totalDepositShares != 0 ? totalUSDC / totalDepositShares : 0;
 
