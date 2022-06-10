@@ -55,9 +55,12 @@ describe("Algo", function () {
       printVars();
       deposit(1, 100);
       printVars();
+      hedge(0.5);
+      printVars();
       let balance = getUserBalance(1);
-      assert.equal(balance.USDC, 150);
-      assert.equal(balance.crab, 50);
+      assert.equal(balance.USDC, 75);
+      //fix by claiming the 50 he already had
+      assert.equal(balance.crab, 125);
     });
     xit("deposit, and balance long after hedge", function () {
       deposit(1, 100);

@@ -29,9 +29,17 @@ const reset = () => {
 };
 
 const deposit = (user_id, amount) => {
+  let userLastDeposit = lastDepositedRound[user_id];
+  // has a hedge happened after users last deposit
+  if (round >= userLastDeposit) {
+    accrued_crab[user_id] =
+      depositShares[user_id] *
+      (crabPerDS[round] - crabPerDS[userLastDeposit - 1]);
+  }
+
   let lastFullHedge = full_hedge[full_hedge.length - 1];
   //has a full hedge happened after user deposited
-  if (lastFullHedge >= lastDepositedRound[user_id]) {
+  if (lastFullHedge >= userLastDeposit) {
     let base =
       lastFullHedge === lastDepositedRound[user_id]
         ? lastFullHedge - 1
