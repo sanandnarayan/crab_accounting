@@ -86,6 +86,7 @@ const deposit = (user_id, amount) => {
   depositShares[user_id] = depositShares[user_id] + added_shares;
 };
 
+//TODO yet to complete
 const withdraw = (user_id, amount) => {
   if (amount > getUserBalance(user_id)["USDC"]) return;
   //lastDepositedRound[user_id] = round + 1;
