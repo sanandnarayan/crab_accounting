@@ -28,6 +28,15 @@ const reset = () => {
   full_hedge = [];
 };
 
+const greaterThan = (x, array) => {
+  // TODO change this to binary implementation
+  let i = 0;
+  while (i < array.length) {
+    if (array[i] >= x) break;
+  }
+  return array[i];
+};
+
 // accrue crab , then add usd + do sharemath
 const deposit = (user_id, amount) => {
   console.log("user ", user_id, "is adding ", amount);
@@ -46,12 +55,11 @@ const deposit = (user_id, amount) => {
     let base =
       latestFullHedge === userLastDeposit
         ? latestFullHedge - 1
-        : userLastDeposit; // TODO why is this not userLastDeposit -1
-    let top = latestFullHedge; //TODO this has to be the nearest full hedge
+        : userLastDeposit - 1;
+    let top = greaterThan(userLastDeposit, full_hedge);
+    console.log("top is", top);
     accrued_crab[user_id] +=
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
-    // TODO algo for nearest full hedge
-    // accrued_crab[user_id] = depositShares[user_id] * (crabPerDS[nearEstFullHedge]-crabPerDS[lastDepositedRound[user_id]]);
     totalDepositShares -= depositShares[user_id];
     depositShares[user_id] = 0;
   }
