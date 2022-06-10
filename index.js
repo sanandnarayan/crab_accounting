@@ -64,7 +64,9 @@ const deposit = (user_id, amount) => {
     console.log("top is", top);
     accrued_crab[user_id] +=
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
-    totalDepositShares -= depositShares[user_id];
+    if (totalDepositShares > 0) {
+      totalDepositShares -= depositShares[user_id];
+    }
     depositShares[user_id] = 0;
   }
   // if no full hedge has happend
@@ -160,6 +162,8 @@ const printVars = () => {
     full_hedge,
     "\naccrued crabs",
     accrued_crab,
+    "\n total deposit shares ",
+    totalDepositShares,
     "\n----------\n"
   );
 };
