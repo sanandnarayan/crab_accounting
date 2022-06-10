@@ -28,10 +28,20 @@ const reset = () => {
   full_hedge = [];
 };
 
+// accrue crab , then add usd + do sharemath
 const deposit = (user_id, amount) => {
+  console.log("user ", user_id, "is adding ", amount);
+  if (!depositShares[user_id]) {
+    depositShares[user_id] = 0;
+  }
+
   let userLastDeposit = lastDepositedRound[user_id];
   // has a hedge happened after users last deposit
   if (round >= userLastDeposit) {
+    // since we will move the userLastDeposit round up
+    // we need to accrue the crabs he has accrued till now'
+    // to compensate for the reduction in cumulativeAccruedCrabs
+    // which will be caused by moving the userLastDeposit up
     accrued_crab[user_id] =
       depositShares[user_id] *
       (crabPerDS[round] - crabPerDS[userLastDeposit - 1]);
@@ -44,19 +54,19 @@ const deposit = (user_id, amount) => {
       lastFullHedge === lastDepositedRound[user_id]
         ? lastFullHedge - 1
         : lastDepositedRound[user_id];
+    let top = lastFullHedge; //TODO this has to be the nearest full hedge
     accrued_crab[user_id] =
-      depositShares[user_id] * (crabPerDS[lastFullHedge] - crabPerDS[base]);
+      depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
     // TODO algo for nearest full hedge
     // accrued_crab[user_id] = depositShares[user_id] * (crabPerDS[nearEstFullHedge]-crabPerDS[lastDepositedRound[user_id]]);
     totalDepositShares -= depositShares[user_id];
     depositShares[user_id] = 0;
   }
 
+  // Increase user last deposited round
+  // add amount to totalUSD
+  // increase shares to represent the deposit
   lastDepositedRound[user_id] = round + 1;
-  console.log("user ", user_id, "is adding ", amount);
-  if (!depositShares[user_id]) {
-    depositShares[user_id] = 0;
-  }
 
   totalUSDC += amount;
   let added_shares = amount / multiplierPerDS;
