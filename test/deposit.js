@@ -85,7 +85,7 @@ describe("Algo", function () {
       assert.equal(balance.USDC, 10);
       assert.equal(balance.crab, 100);
     });
-    xit("deposit, and balance long after hedge", function () {
+    it("deposit, and balance long after hedge", function () {
       deposit(1, 100);
       printVars();
 
@@ -108,9 +108,9 @@ describe("Algo", function () {
       assert.equal(balance.USDC, 0);
       assert.equal(balance.crab, 200);
 
-      //balance = getUserBalance(1);
-      //assert.equal(balance.USDC, 0);
-      //assert.equal(balance.crab, 100);
+      balance = getUserBalance(1);
+      assert.equal(balance.USDC, 0);
+      assert.equal(balance.crab, 100);
     });
   });
 });

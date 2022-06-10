@@ -186,7 +186,7 @@ let claimCrabs = (user_id, till_round, percent) => {
     // set last_deposit_user_round to the previous to the previous round
     last_deposit_from_user -= 1;
   }
-  accrued_crab[user_id] =
+  accrued_crab[user_id] +=
     previousShares *
     (crabPerDS[till_round] - crabPerDS[last_deposit_from_user]);
 };
@@ -197,8 +197,9 @@ let getUserBalance = (user_id) => {
   let anyFullHedge = full_hedge.length > 0;
   // If there was a full hedge after the user deposited
   // then set the sharesAtFullHedge to fullShares
-  if (anyFullHedge && lastDepositedRound[user_id] <= last_full_hedge) {
-    claimCrabs(user_id, last_full_hedge, 1);
+  if (anyFullHedge && last_full_hedge >= lastDepositedRound[user_id]) {
+    let top = greaterOrEquals(lastDepositedRound[user_id], full_hedge);
+    claimCrabs(user_id, top, 1);
   }
   result.USDC = depositShares[user_id] * multiplierPerDS;
 
