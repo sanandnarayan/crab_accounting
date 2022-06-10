@@ -28,7 +28,7 @@ const reset = () => {
   full_hedge = [];
 };
 
-const greaterThan = (x, array) => {
+const greaterOrEquals = (x, array) => {
   // TODO change this to binary implementation
   let i = 0;
   while (i < array.length) {
@@ -56,7 +56,7 @@ const deposit = (user_id, amount) => {
       latestFullHedge === userLastDeposit
         ? latestFullHedge - 1
         : userLastDeposit - 1;
-    let top = greaterThan(userLastDeposit, full_hedge);
+    let top = greaterOrEquals(userLastDeposit, full_hedge);
     console.log("top is", top);
     accrued_crab[user_id] +=
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
