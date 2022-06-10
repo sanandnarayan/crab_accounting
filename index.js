@@ -38,14 +38,15 @@ const deposit = (user_id, amount) => {
   }
   let latestFullHedge = full_hedge[full_hedge.length - 1];
   //-------
+
   //CRAB Accrue
+  //has a full hedge happened after user deposited
   let userLastDeposit = lastDepositedRound[user_id];
   if (latestFullHedge >= userLastDeposit) {
-    //has a full hedge happened after user deposited
     let base =
-      latestFullHedge === lastDepositedRound[user_id]
+      latestFullHedge === userLastDeposit
         ? latestFullHedge - 1
-        : lastDepositedRound[user_id];
+        : userLastDeposit; // TODO why is this not userLastDeposit -1
     let top = latestFullHedge; //TODO this has to be the nearest full hedge
     accrued_crab[user_id] +=
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
@@ -54,7 +55,8 @@ const deposit = (user_id, amount) => {
     totalDepositShares -= depositShares[user_id];
     depositShares[user_id] = 0;
   }
-  // has a hedge happened after users last deposit
+  // if no full hedge has happend
+  // and a partial has hedge happened after users last deposit
   else if (round >= userLastDeposit) {
     // since we will move the userLastDeposit round up
     // we need to accrue the crabs he has accrued till now'
