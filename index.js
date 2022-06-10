@@ -64,6 +64,8 @@ const deposit = (user_id, amount) => {
     console.log("top is", top);
     accrued_crab[user_id] +=
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
+    // for the usecase that a full hedge already made the totalDepositShares 0
+    // dont want to make it negative just because we did not update the users shares
     if (totalDepositShares > 0) {
       totalDepositShares -= depositShares[user_id];
     }
