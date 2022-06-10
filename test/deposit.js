@@ -23,15 +23,10 @@ describe("Algo", function () {
     });
     it("allows a user to deposit, and know his balance immediately after a hedge round", function () {
       deposit(1, 100);
-      printVars();
       hedge(1);
-      printVars();
       deposit(2, 100);
-      printVars();
       hedge(1);
-      printVars();
       deposit(1, 100);
-      printVars();
       let balance = getUserBalance(2);
       assert.equal(balance.USDC, 0);
       assert.equal(balance.crab, 100);
@@ -41,33 +36,24 @@ describe("Algo", function () {
     });
     it("allows a user to deposit, and know his balance after a partial hedge", function () {
       deposit(1, 100);
-      printVars();
       hedge(0.5);
-      printVars();
       let balance = getUserBalance(1);
       assert.equal(balance.USDC, 50);
       assert.equal(balance.crab, 50);
     });
     it("redosit and know balance", function () {
       deposit(1, 100);
-      printVars();
       hedge(0.5);
-      printVars();
       deposit(1, 100);
-      printVars();
       let balance = getUserBalance(1);
       assert.equal(balance.USDC, 150);
       assert.equal(balance.crab, 50);
     });
     it("allows a user to deposit again after a hedge, and know his balance", function () {
       deposit(1, 100);
-      printVars();
       hedge(0.5);
-      printVars();
       deposit(1, 100);
-      printVars();
       hedge(0.5);
-      printVars();
       let balance = getUserBalance(1);
       assert.equal(balance.USDC, 75);
       //fix by claiming the 50 he already had
