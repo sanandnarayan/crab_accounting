@@ -31,36 +31,38 @@ const reset = () => {
 // accrue crab , then add usd + do sharemath
 const deposit = (user_id, amount) => {
   console.log("user ", user_id, "is adding ", amount);
+  // initialize
   if (!depositShares[user_id]) {
     depositShares[user_id] = 0;
+    accrued_crab[user_id] = 0;
   }
-
+  let latestFullHedge = full_hedge[full_hedge.length - 1];
+  //-------
+  //CRAB Accrue
   let userLastDeposit = lastDepositedRound[user_id];
-  // has a hedge happened after users last deposit
-  if (round >= userLastDeposit) {
-    // since we will move the userLastDeposit round up
-    // we need to accrue the crabs he has accrued till now'
-    // to compensate for the reduction in cumulativeAccruedCrabs
-    // which will be caused by moving the userLastDeposit up
-    accrued_crab[user_id] =
-      depositShares[user_id] *
-      (crabPerDS[round] - crabPerDS[userLastDeposit - 1]);
-  }
-
-  let lastFullHedge = full_hedge[full_hedge.length - 1];
-  //has a full hedge happened after user deposited
-  if (lastFullHedge >= userLastDeposit) {
+  if (latestFullHedge >= userLastDeposit) {
+    //has a full hedge happened after user deposited
     let base =
-      lastFullHedge === lastDepositedRound[user_id]
-        ? lastFullHedge - 1
+      latestFullHedge === lastDepositedRound[user_id]
+        ? latestFullHedge - 1
         : lastDepositedRound[user_id];
-    let top = lastFullHedge; //TODO this has to be the nearest full hedge
-    accrued_crab[user_id] =
+    let top = latestFullHedge; //TODO this has to be the nearest full hedge
+    accrued_crab[user_id] +=
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
     // TODO algo for nearest full hedge
     // accrued_crab[user_id] = depositShares[user_id] * (crabPerDS[nearEstFullHedge]-crabPerDS[lastDepositedRound[user_id]]);
     totalDepositShares -= depositShares[user_id];
     depositShares[user_id] = 0;
+  }
+  // has a hedge happened after users last deposit
+  else if (round >= userLastDeposit) {
+    // since we will move the userLastDeposit round up
+    // we need to accrue the crabs he has accrued till now'
+    // to compensate for the reduction in cumulativeAccruedCrabs
+    // which will be caused by moving the userLastDeposit up
+    accrued_crab[user_id] +=
+      depositShares[user_id] *
+      (crabPerDS[round] - crabPerDS[userLastDeposit - 1]);
   }
 
   // Increase user last deposited round

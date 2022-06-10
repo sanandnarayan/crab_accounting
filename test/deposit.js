@@ -15,8 +15,11 @@ describe("Algo", function () {
     });
     it("allows a user to deposit, and know his balance after a hedge round", function () {
       deposit(1, 100);
+      printVars();
       hedge(1);
+      printVars();
       deposit(1, 100);
+      printVars();
       let balance = getUserBalance(1);
       assert.equal(balance.USDC, 100);
       assert.equal(balance.crab, 100);
