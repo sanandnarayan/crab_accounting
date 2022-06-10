@@ -4,7 +4,6 @@ let multiplierPerDS = 1;
 let totalDepositShares = 0; //DepositSharestoken.totalSupply()
 
 let totalUSDC = 0; //USDC.getBalance(this)
-let totalDeployedUSDC = [0]; // totalDeployedUSD cummulative roundwise to calculate crab per round
 
 let totalCrab = 0; //crabShares
 let crabPerDS = [0]; //crabShaeresPerDepositedShare cumulative per round array
@@ -15,19 +14,17 @@ let full_hedge = [];
 
 const reset = () => {
   depositShares = {};
-  multiplierPerDS = 1;
-  totalUSDC = 0; //USDC.getBalance(this)
-  totalDeployedUSDC = [0]; // totalDeployedUSD cummulative roundwise to calculate crab per round
-  totalDepositShares = 0; //DepositSharestoken.totalSupply()
   lastDepositedRound = {}; // lastDepositedRound of each user
+  multiplierPerDS = 1;
+  totalDepositShares = 0; //DepositSharestoken.totalSupply()
+
+  totalUSDC = 0; //USDC.getBalance(this)
 
   totalCrab = 0; //crabShares
   crabPerDS = [0]; //crabShaeresPerDepositedShare cumulative per round array
-
-  //const crabValue = ()=> (vault.collateral - vault.debt)*ETHUSD;
-  round = 0; // current round
-
   accrued_crab = {}; //per user, when he withdraws
+
+  round = 0; // current round
   full_hedge = [];
 };
 
@@ -73,29 +70,29 @@ const withdraw = (user_id, amount) => {
   console.log("added to accrued_crab", accrued_crab[user_id]);
 };
 
+const crabETHVal = () => 1;
+
 const hedge = (percent) => {
-  let thisRoundCrab = 0;
+  // increases round
   round += 1;
+
+  // reduces amount in USDC
   const amount = totalUSDC * percent;
   totalUSDC -= amount;
-  totalDeployedUSDC[round] = totalDeployedUSDC[round - 1] + amount;
-  thisRoundCrab = amount / (amount + totalDeployedUSDC[round - 1]);
 
-  if (totalCrab === 0) {
-    totalCrab = amount;
+  const thisRoundCrabs = amount / crabETHVal();
+  // adds equivalent crab
+  totalCrab = totalCrab + thisRoundCrabs;
+  crabPerDS[round] = crabPerDS[round - 1] + thisRoundCrabs / totalDepositShares;
+
+  if (percent !== 1) {
+    // if not a full hedge, reduce share price to reflect new value
+    multiplierPerDS = multiplierPerDS * (1 - percent);
   } else {
-    //totalCrab += amount / perCrabValue();
-    totalCrab = totalCrab / (1 - thisRoundCrab);
-  }
-  let CrabIncrease = totalCrab * thisRoundCrab;
-  crabPerDS[round] = crabPerDS[round - 1] + CrabIncrease / totalDepositShares;
-
-  if (percent === 1) {
+    // else reset shares to initial state and push the edge case to array
+    totalDepositShares = 0;
     multiplierPerDS = 1;
     full_hedge.push(round);
-    totalDepositShares = 0;
-  } else {
-    multiplierPerDS = multiplierPerDS * (1 - percent);
   }
 
   console.log(
@@ -104,7 +101,7 @@ const hedge = (percent) => {
     "hedge percent",
     percent,
     " ThisRoundCrab",
-    thisRoundCrab
+    thisRoundCrabs
   );
 };
 
