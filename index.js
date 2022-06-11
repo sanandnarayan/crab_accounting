@@ -41,17 +41,8 @@ const greaterOrEquals = (x, array) => {
   return array[i];
 };
 
-// accrue crab , then add usd + do sharemath
-const deposit = (user_id, amount) => {
-  console.log("user ", user_id, "is adding ", amount);
-  // initialize
-  if (!depositShares[user_id]) {
-    depositShares[user_id] = 0;
-    accrued_crab[user_id] = 0;
-  }
+const _accrue_crab = (user_id) => {
   let latestFullHedge = full_hedge[full_hedge.length - 1];
-  //-------
-
   //CRAB Accrue
   //has a full hedge happened after user deposited
   let userLastDeposit = lastDepositedRound[user_id];
@@ -76,7 +67,18 @@ const deposit = (user_id, amount) => {
     // the multiplier has already been updated while heding,
     // so no need to reduce shares
   }
+};
 
+// accrue crab , then add usd + do sharemath
+const deposit = (user_id, amount) => {
+  console.log("user ", user_id, "is adding ", amount);
+  // initialize
+  if (!depositShares[user_id]) {
+    depositShares[user_id] = 0;
+    accrued_crab[user_id] = 0;
+  }
+  //-------
+  _accrue_crab(user_id);
   // Increase user last deposited round
   // add amount to totalUSD
   // increase shares to represent the deposit
@@ -95,6 +97,7 @@ const withdraw = (user_id, amount) => {
   console.log("user ", user_id, "is removing ", amount);
 
   //TODO accrued shares logic
+  //_accrue_crab(user_id);
   accrued_crab[user_id] = withdrawn_shares * crabPerDS[round];
   console.log("added to accrued_crab", accrued_crab[user_id]);
 
