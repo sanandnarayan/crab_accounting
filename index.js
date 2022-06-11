@@ -55,17 +55,12 @@ const deposit = (user_id, amount) => {
   //CRAB Accrue
   //has a full hedge happened after user deposited
   let userLastDeposit = lastDepositedRound[user_id];
+  let top = round;
   if (latestFullHedge >= userLastDeposit) {
-    let base =
-      latestFullHedge === userLastDeposit
-        ? latestFullHedge - 1
-        : userLastDeposit - 1;
     let top = greaterOrEquals(userLastDeposit, full_hedge);
-    console.log("top is", top);
     accrued_crab[user_id] +=
-      depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
-    // for the usecase that a full hedge already made the totalDepositShares 0
-    // dont want to make it negative just because we did not update the users shares
+      depositShares[user_id] *
+      (crabPerDS[top] - crabPerDS[userLastDeposit - 1]);
     _reduceShares(user_id, depositShares[user_id]);
   }
   // if no full hedge has happend
@@ -77,7 +72,9 @@ const deposit = (user_id, amount) => {
     // which will be caused by moving the userLastDeposit up
     accrued_crab[user_id] +=
       depositShares[user_id] *
-      (crabPerDS[round] - crabPerDS[userLastDeposit - 1]);
+      (crabPerDS[top] - crabPerDS[userLastDeposit - 1]);
+    // the multiplier has already been updated while heding,
+    // so no need to reduce shares
   }
 
   // Increase user last deposited round
@@ -97,13 +94,13 @@ const withdraw = (user_id, amount) => {
   //lastDepositedRound[user_id] = round + 1;
   console.log("user ", user_id, "is removing ", amount);
 
-  let withdrawn_shares = amount / multiplierPerDS;
-  depositShares[user_id] = depositShares[user_id] - amount / multiplierPerDS;
-  totalUSDC -= amount;
-  totalDepositShares -= withdrawn_shares;
-
+  //TODO accrued shares logic
   accrued_crab[user_id] = withdrawn_shares * crabPerDS[round];
   console.log("added to accrued_crab", accrued_crab[user_id]);
+
+  totalUSDC -= amount;
+  let withdrawn_shares = amount / multiplierPerDS;
+  _reduceShares(user_id, withdrawn_shares);
 };
 
 const crabETHVal = () => 1;
