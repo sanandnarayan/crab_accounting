@@ -13,6 +13,6 @@
     "nyc": "^15.1.0"
   },
   "scripts": {
-    "test": "c8 --reporter text mocha"
+    "test": "c8 --100  --reporter text  mocha"
   }
 }
