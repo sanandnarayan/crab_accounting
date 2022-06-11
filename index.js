@@ -29,16 +29,24 @@ const reset = () => {
 };
 
 const greaterOrEquals = (x, array) => {
-  // TODO change this to binary implementation
-  let i = 0;
-  while (i < array.length) {
-    if (array[i] >= x) {
+  if (array.length == 0) return;
+  let low = 0;
+  let high = array.length;
+  let mid;
+  while (1) {
+    mid = Math.floor((low + high) / 2);
+    if (mid < 1) {
+      // single element
       break;
+    }
+    if (array[mid - 1] < x && array[mid] >= x) break;
+    if (array[mid] < x) {
+      low = mid;
     } else {
-      i++;
+      high = mid;
     }
   }
-  return array[i];
+  return array[mid];
 };
 
 const _accrue_crab = (user_id) => {

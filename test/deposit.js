@@ -59,7 +59,6 @@ describe("Algo", function () {
       hedge(0.5);
       let balance = getUserBalance(1);
       assert.equal(balance.USDC, 75);
-      //fix by claiming the 50 he already had
       assert.equal(balance.crab, 125);
     });
     it("deposit, then few full hedges happens and know his balance", function () {
@@ -111,6 +110,21 @@ describe("Algo", function () {
       balance = getUserBalance(1);
       assert.equal(balance.USDC, 0);
       assert.equal(balance.crab, 100);
+    });
+    it("binary search breaking", function () {
+      deposit(1, 100);
+      printVars();
+      hedge(0.5);
+      printVars();
+      deposit(1, 100);
+      printVars();
+      hedge(0.5);
+      printVars();
+      hedge(1);
+      printVars();
+      let balance = getUserBalance(1);
+      assert.equal(balance.USDC, 0);
+      assert.equal(balance.crab, 200);
     });
   });
 });
