@@ -3,14 +3,15 @@ yarn install
 yarn test
 ```
 
-so I need to claim the crabs, when a user deposits after a hedge (partial of ful) has happend.
-why because at that stage , the deposited shares then represent the crabs also which is not true as the hedge has not happened.
-but that is why we have the round numbers right? But as we dont know what was the deposit shares before the deposit we need to do the claim
+Abbreviation
+CummulateCrabPerDepositoryShare
 
-### TODO
+The crux of the algo is
 
-1. cleanup the deposit function, furthur if possible
-2. binary search for greaterThanEquals
-3. test withdraws
-4. make getBalance into a view function.
-5. reuse the claimcrabs logic
+1. The deposit shares represent USD DS \* DSmultiplier
+2. Everytime depositor adds or withdraws we store his accumulated crabs in another variable.
+   So DS \* (CCDS(Now)-CCDS(lastDepositRound-1)) + accumulatedCrab gives the crab of the user
+
+Note CumulativeCrab/DS (ccds) is the list of cummulative crab value per depository share. ccds[@RoundY] - ccds[@RoundX] gives us the crabs earned by depositing at X and staying till round Y. So if I as a user deposit from W, and then make another deposit at Round X , I should not get the ccds from W to Y for the shares I got in round X . That is why we are accruing till X into a new variable.
+
+3. The specialcase here being fullHedge, as we dont reduce the shares of each depositor at full hedge, we need to account for this when user deposit/withdraws or checks balance as a special case
