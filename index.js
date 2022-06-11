@@ -170,25 +170,20 @@ const printVars = () => {
   );
 };
 
-let reduceShares = (user_id, shares) => {
+let _reduceShares = (user_id, shares) => {
   depositShares[user_id] -= shares;
   if (totalDepositShares > 0) {
     totalDepositShares -= shares;
   }
 };
 
-let claimCrabs = (user_id, till_round, percent) => {
-  let previousShares = depositShares[user_id];
-  reduceShares(user_id, previousShares * percent);
+let getAccruedCrabs = (user_id, till_round) => {
   let last_deposit_from_user = lastDepositedRound[user_id];
-
-  if (till_round === last_deposit_from_user) {
-    // set last_deposit_user_round to the previous to the previous round
-    last_deposit_from_user -= 1;
-  }
-  accrued_crab[user_id] +=
-    previousShares *
-    (crabPerDS[till_round] - crabPerDS[last_deposit_from_user]);
+  return (
+    accrued_crab[user_id] +
+    depositShares[user_id] *
+      (crabPerDS[till_round] - crabPerDS[last_deposit_from_user - 1])
+  );
 };
 
 let getUserBalance = (user_id) => {
@@ -201,20 +196,32 @@ let getUserBalance = (user_id) => {
     // get the first full hedge after users last deposit
     let top = greaterOrEquals(lastDepositedRound[user_id], full_hedge);
     // TODO convert this to a view function!
-    claimCrabs(user_id, top, 1);
-  }
-  result.USDC = depositShares[user_id] * multiplierPerDS;
+    let users_accrued_crab = getAccruedCrabs(user_id, top);
+    result.USDC = 0;
 
-  // lastest compounded Crab price - the crab price the user paid?
-  // crabPerDS is cumulative, so you have to take one round prior
-  // for ex: crabPerDS [ 0, 0.5 ] , so user got 100* (0.5-0)
-  let userUnClaimedCrab =
-    crabPerDS[crabPerDS.length - 1] -
-    crabPerDS[lastDepositedRound[user_id] - 1];
-  result.crab =
-    depositShares[user_id] * userUnClaimedCrab + (accrued_crab[user_id] ?? 0);
-  console.log("User Balance of ", user_id, " is ", result, "\n");
-  return result;
+    // ?? will we need the unclaimed crab?
+    // I dont think so, because if the user deposited after a full hedge
+    // we wont go into this case. and thats why USDC is 0, because there
+    // was no user deposit after a full hedge!
+    result.crab = users_accrued_crab;
+    console.log("User Balance of ", user_id, " is ", result, "\n");
+    return result;
+
+    // get the accrued crab and the new deposit shares without a write
+  } else {
+    result.USDC = depositShares[user_id] * multiplierPerDS;
+
+    // lastest compounded Crab price - the crab price the user paid?
+    // crabPerDS is cumulative, so you have to take one round prior
+    // for ex: crabPerDS [ 0, 0.5 ] , so user got 100* (0.5-0)
+    let userUnClaimedCrab =
+      crabPerDS[crabPerDS.length - 1] -
+      crabPerDS[lastDepositedRound[user_id] - 1];
+    result.crab =
+      depositShares[user_id] * userUnClaimedCrab + (accrued_crab[user_id] ?? 0);
+    console.log("User Balance of ", user_id, " is ", result, "\n");
+    return result;
+  }
 };
 
 export { withdraw, deposit, getUserBalance, hedge, reset, printVars };
