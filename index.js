@@ -28,7 +28,7 @@ const reset = () => {
   full_hedge = [];
 };
 
-const greaterOrEquals = (x, array) => {
+const _greaterOrEquals = (x, array) => {
   if (array.length == 0) return;
   let low = 0;
   let high = array.length;
@@ -56,7 +56,7 @@ const _accrue_crab = (user_id) => {
   let userLastDeposit = lastDepositedRound[user_id];
   let top = round;
   if (latestFullHedge >= userLastDeposit) {
-    let top = greaterOrEquals(userLastDeposit, full_hedge);
+    let top = _greaterOrEquals(userLastDeposit, full_hedge);
     accrued_crab[user_id] +=
       depositShares[user_id] *
       (crabPerDS[top] - crabPerDS[userLastDeposit - 1]);
@@ -203,7 +203,7 @@ let getUserBalance = (user_id) => {
   // then set the sharesAtFullHedge to fullShares
   if (anyFullHedge && last_full_hedge >= lastDepositedRound[user_id]) {
     // get the first full hedge after users last deposit
-    let top = greaterOrEquals(lastDepositedRound[user_id], full_hedge);
+    let top = _greaterOrEquals(lastDepositedRound[user_id], full_hedge);
     let users_accrued_crab = getAccruedCrabs(user_id, top);
 
     // ?? will we need the unclaimed crab?
@@ -232,7 +232,15 @@ let getUserBalance = (user_id) => {
   }
 };
 
-export { withdraw, deposit, getUserBalance, hedge, reset, printVars };
+export {
+  withdraw,
+  deposit,
+  getUserBalance,
+  hedge,
+  reset,
+  printVars,
+  _greaterOrEquals,
+};
 
 // Think about the case where there are no deposits and hedges for sometime.
 // In that the strategy accrues large profits, and the crabShareValue increases.
