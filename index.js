@@ -88,14 +88,12 @@ const deposit = (user_id, amount) => {
   _addShares(user_id, amount / multiplierPerDS);
 };
 
-//TODO yet to complete
 const withdraw = (user_id, amount) => {
   //unsigned int will take care
   //if (amount > getUserBalance(user_id)["USDC"]) return;
   //lastDepositedRound[user_id] = round + 1;
   console.log("user ", user_id, "is removing ", amount);
 
-  //TODO accrued shares logic
   _accrue_crab(user_id);
   // Increase user last deposited round
   lastDepositedRound[user_id] = round + 1;
