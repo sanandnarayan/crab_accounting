@@ -66,10 +66,7 @@ const deposit = (user_id, amount) => {
       depositShares[user_id] * (crabPerDS[top] - crabPerDS[base]);
     // for the usecase that a full hedge already made the totalDepositShares 0
     // dont want to make it negative just because we did not update the users shares
-    if (totalDepositShares > 0) {
-      totalDepositShares -= depositShares[user_id];
-    }
-    depositShares[user_id] = 0;
+    _reduceShares(user_id, depositShares[user_id]);
   }
   // if no full hedge has happend
   // and a partial has hedge happened after users last deposit
@@ -195,14 +192,13 @@ let getUserBalance = (user_id) => {
   if (anyFullHedge && last_full_hedge >= lastDepositedRound[user_id]) {
     // get the first full hedge after users last deposit
     let top = greaterOrEquals(lastDepositedRound[user_id], full_hedge);
-    // TODO convert this to a view function!
     let users_accrued_crab = getAccruedCrabs(user_id, top);
-    result.USDC = 0;
 
     // ?? will we need the unclaimed crab?
     // I dont think so, because if the user deposited after a full hedge
     // we wont go into this case. and thats why USDC is 0, because there
     // was no user deposit after a full hedge!
+    result.USDC = 0;
     result.crab = users_accrued_crab;
     console.log("User Balance of ", user_id, " is ", result, "\n");
     return result;
