@@ -90,7 +90,8 @@ const deposit = (user_id, amount) => {
 
 //TODO yet to complete
 const withdraw = (user_id, amount) => {
-  if (amount > getUserBalance(user_id)["USDC"]) return;
+  //unsigned int will take care
+  //if (amount > getUserBalance(user_id)["USDC"]) return;
   //lastDepositedRound[user_id] = round + 1;
   console.log("user ", user_id, "is removing ", amount);
 
@@ -219,7 +220,7 @@ let getUserBalance = (user_id) => {
       crabPerDS[crabPerDS.length - 1] -
       crabPerDS[lastDepositedRound[user_id] - 1];
     result.crab =
-      depositShares[user_id] * userUnClaimedCrab + (accrued_crab[user_id] ?? 0);
+      depositShares[user_id] * userUnClaimedCrab + accrued_crab[user_id];
     console.log("User Balance of ", user_id, " is ", result, "\n");
     return result;
   }
