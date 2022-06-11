@@ -29,14 +29,20 @@ describe("Algo", function () {
     });
     it("allows a user to partial withdraw after hedge", function () {
       deposit(1, 100);
-      printVars();
       hedge(0.5);
-      printVars();
       withdraw(1, 10);
-      printVars();
       let balance = getUserBalance(1);
       assert.equal(balance.USDC, 40);
       assert.equal(balance.crab, 50);
+    });
+    it("Full hedge correctly hands the withdrawn amount as well", function () {
+      deposit(1, 100);
+      hedge(0.5);
+      withdraw(1, 10);
+      hedge(1);
+      let balance = getUserBalance(1);
+      assert.equal(balance.USDC, 0);
+      assert.equal(balance.crab, 90);
     });
   });
 });
