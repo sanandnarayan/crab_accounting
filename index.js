@@ -123,8 +123,8 @@ const hedge = (percent) => {
   const amount = totalUSDC * percent;
   totalUSDC -= amount;
 
-  const thisRoundCrabs = amount / crabETHVal();
   // adds equivalent crab
+  const thisRoundCrabs = amount / crabETHVal();
   totalCrab = totalCrab + thisRoundCrabs;
   crabPerDS[round] = crabPerDS[round - 1] + thisRoundCrabs / totalDepositShares;
 
