@@ -80,14 +80,12 @@ const deposit = (user_id, amount) => {
   //-------
   _accrue_crab(user_id);
   // Increase user last deposited round
-  // add amount to totalUSD
-  // increase shares to represent the deposit
   lastDepositedRound[user_id] = round + 1;
 
+  // add amount to totalUSD
   totalUSDC += amount;
-  let added_shares = amount / multiplierPerDS;
-  totalDepositShares += added_shares;
-  depositShares[user_id] = depositShares[user_id] + added_shares;
+  // increase shares to represent the deposit
+  _addShares(user_id, amount / multiplierPerDS);
 };
 
 //TODO yet to complete
@@ -97,13 +95,15 @@ const withdraw = (user_id, amount) => {
   console.log("user ", user_id, "is removing ", amount);
 
   //TODO accrued shares logic
-  //_accrue_crab(user_id);
-  accrued_crab[user_id] = withdrawn_shares * crabPerDS[round];
+  _accrue_crab(user_id);
+  // Increase user last deposited round
+  lastDepositedRound[user_id] = round + 1;
   console.log("added to accrued_crab", accrued_crab[user_id]);
 
+  // reduce amount to totalUSD
   totalUSDC -= amount;
-  let withdrawn_shares = amount / multiplierPerDS;
-  _reduceShares(user_id, withdrawn_shares);
+  // reduce shares to represent the withdrawal
+  _reduceShares(user_id, amount / multiplierPerDS);
 };
 
 const crabETHVal = () => 1;
@@ -172,6 +172,11 @@ let _reduceShares = (user_id, shares) => {
   if (totalDepositShares > 0) {
     totalDepositShares -= shares;
   }
+};
+
+let _addShares = (user_id, shares) => {
+  depositShares[user_id] += shares;
+  totalDepositShares += shares;
 };
 
 let getAccruedCrabs = (user_id, till_round) => {
